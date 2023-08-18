@@ -6,6 +6,20 @@
 
 using namespace std;
 
+void run_simulation_2d_solo(int strat, const char * file, const char * file_sums, int sample_size, int id) {
+    torus_2D * tor = new torus_2D();
+    agent_2D * agent = new agent_2D(tor, strat, 1);
+    simulation_2D sim(agent, sample_size, file, file_sums);
+    std::cout << "Simulation " << id << " starting..." << std::endl;
+    auto start = std::chrono::system_clock::now();
+    sim.simulate_sample_size();
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed = end - start; 
+    std::cout << "Elapsed time: " << elapsed.count() << "s\n" << std::endl;
+    free(tor);
+    free(agent);
+}
+
 void run_simulation_2d(int strat1, int strat2, const char * file, const char * file_sums, int sample_size, int id) {
     torus_2D * tor = new torus_2D();
     agent_2D * agent1 = new agent_2D(tor, strat1, 1);
@@ -103,21 +117,11 @@ void run_simulation_2d_mines_competition(int strat1, int strat2, const char * fi
 }
 
 int main() {
-    int sample_size = 5000;
+    int sample_size = 10000;
 
     auto start = std::chrono::system_clock::now();
 
-    // need to run gb_vs_gu for mine levels 5, 10, 15, 20, 25, 30 with 5000 samples each 
-    // pick the right length of simulation to get to just over 98% combined area covered
-
-    // run_simulation_2d_mines_competition(GREEDY_BIASED, GREEDY_UNBIASED, "gb_vs_gu_30.txt", "gb_vs_gu_30_sums.txt", sample_size, 0.30, 1);
-    // run_simulation_2d_mines_competition(GREEDY_BIASED, GREEDY_UNBIASED, "gb_vs_gu_25.txt", "gb_vs_gu_25_sums.txt", sample_size, 0.25, 2);
-    // run_simulation_2d_mines_competition(GREEDY_BIASED, GREEDY_UNBIASED, "gb_vs_gu_20.txt", "gb_vs_gu_20_sums.txt", sample_size, 0.20, 3);
-    // run_simulation_2d_mines_competition(GREEDY_BIASED, GREEDY_UNBIASED, "gb_vs_gu_15.txt", "gb_vs_gu_15_sums.txt", sample_size, 0.15, 4);
-    run_simulation_2d_mines_competition(GREEDY_BIASED, GREEDY_UNBIASED, "gb_vs_gu_10.txt", "gb_vs_gu_10_sums.txt", sample_size, 0.10, 5);
-    run_simulation_2d_mines_competition(GREEDY_BIASED, GREEDY_UNBIASED, "gb_vs_gu_5.txt", "gb_vs_gu_5_sums.txt", sample_size, 0.05, 6);
-
-
+    run_simulation_2d_solo(RANDOM_WALK_NB, "rwnb_solo.txt", "rwnb_solo_sums.txt", sample_size, 1);
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed = end - start; 

@@ -2,8 +2,8 @@
 
 #define TORUS_SIZE 1001
 
-#define U_LIST_LEN 20
-#define U_LIST_MAX 1
+#define U_LIST_LEN 160
+#define U_LIST_MAX 8
 
 #define MEMORY 7
 #define VIKI_MEMORY 1002001
@@ -26,6 +26,7 @@
 #define GREEDY_BIASED_YZ 5
 #define GREEDY_BIASED_ZX 6
 #define VIKI_COLORBLIND 7
+#define RANDOM_WALK_NB 8
 
 const int dirx[] = {1, 0, 0, -1, 0, 0};
 const int diry[] = {0, 1, 0, 0, -1, 0};

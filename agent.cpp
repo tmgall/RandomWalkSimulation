@@ -36,6 +36,11 @@ class agent_2D {
             this->x = rand() % TORUS_SIZE;
             this->y = rand() % TORUS_SIZE;
             this->area_covered = 0;
+            this->memory[0] = RIGHT;
+            this->memory[1] = 2;  
+            for (int i = 2; i < VIKI_MEMORY; i++) {
+                this->memory[i] = -1;
+            }
         }
 
         void update_torus() {
@@ -52,6 +57,7 @@ class agent_2D {
             if (strategy == RANDOM_WALK) direction = random_walk();
             if (strategy == GREEDY_BIASED) direction = greedy_biased();
             if (strategy == GREEDY_UNBIASED) direction = greedy_unbiased();
+            if (strategy == RANDOM_WALK_NB) direction = random_walk_non_backtracking();
             if (peek(direction) == MINE) return;
             this->x = (this->x + dirx[direction] + TORUS_SIZE) % TORUS_SIZE;
             this->y = (this->y + diry[direction] + TORUS_SIZE) % TORUS_SIZE;
@@ -75,6 +81,22 @@ class agent_2D {
             if (peek(DOWN) != MINE) directions[count++] = DOWN;
             if (count == 0) return RIGHT;
             return directions[rand() % count]; 
+        }
+
+        int random_walk_non_backtracking() {
+            int directions[4];
+            int count = 0;
+            int last_direction = this->memory[0];
+            if (peek(RIGHT) != MINE && peek(RIGHT) != last_direction) directions[count++] = RIGHT;
+            if (peek(UP) != MINE && peek(UP) != last_direction) directions[count++] = UP;
+            if (peek(LEFT) != MINE && peek(LEFT) != last_direction) directions[count++] = LEFT;
+            if (peek(DOWN) != MINE && peek(DOWN) != last_direction) directions[count++] = DOWN;
+            int direction = RIGHT;
+            if (count > 0) {
+                direction = directions[rand() % count];
+            }
+            this->memory[0] = direction;
+            return direction;
         }
 
         int greedy_biased() {
@@ -255,6 +277,9 @@ class agent_3D {
             this->x = rand() % TORUS_SIZE;
             this->y = rand() % TORUS_SIZE;
             this->area_covered = 0;
+            for (int i = 0; i < MEMORY; i++) {
+                this->memory[i] = 0;
+            }
         }
 
         void update_torus() {
@@ -293,6 +318,7 @@ class agent_3D {
             if (strategy == GREEDY_BIASED_XY) direction = greedy_biased_xy();
             if (strategy == GREEDY_BIASED_YZ) direction = greedy_biased_yz();
             if (strategy == GREEDY_BIASED_ZX) direction = greedy_biased_zx();
+            if (strategy == RANDOM_WALK_NB) direction = random_walk_non_backtracking();
             int new_x = (this->x + dirx[direction] + TORUS_SIZE) % TORUS_SIZE;
             int new_y = (this->y + diry[direction] + TORUS_SIZE) % TORUS_SIZE;
             int new_z = (this->z + dirz[direction] + TORUS_SIZE) % TORUS_SIZE;
@@ -318,6 +344,24 @@ class agent_3D {
         int random_walk() {
             int dir = rand() % 6;
             return dir;  
+        }
+
+        int random_walk_non_backtracking() {
+            int directions[6];
+            int count = 0;
+            int last_direction = this->memory[0];
+            if (peek(RIGHT) != MINE && peek(RIGHT) != last_direction) directions[count++] = RIGHT;
+            if (peek(UP) != MINE && peek(UP) != last_direction) directions[count++] = UP;
+            if (peek(LEFT) != MINE && peek(LEFT) != last_direction) directions[count++] = LEFT;
+            if (peek(DOWN) != MINE && peek(DOWN) != last_direction) directions[count++] = DOWN;
+            if (peek(ZUP) != MINE && peek(ZUP) != last_direction) directions[count++] = ZUP;
+            if (peek(ZDOWN) != MINE && peek(ZDOWN) != last_direction) directions[count++] = ZDOWN;
+            int direction = RIGHT;
+            if (count > 0) {
+                direction = directions[rand() % count];
+            }
+            this->memory[0] = direction;
+            return direction;
         }
 
         int greedy_biased() {
