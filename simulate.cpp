@@ -216,6 +216,118 @@ class simulation_2D_1v1 {
 };
 
 /*
+ * Simulates a competition between two agents in 2D and calculates their interface.
+ * 
+ * The output file will hold the total areas covered at the specified
+ * u values by each agent.  
+ */
+class simulation_2D_1v1_interface {
+    public:
+        agent_2D * agent1 = NULL;
+        agent_2D * agent2 = NULL;
+        long scaled_u_list[U_LIST_LEN];
+        int sample_size = 1;
+        std::ofstream output_file; 
+        std::ofstream output_file_sums; 
+        unsigned long long team1_area_total[U_LIST_LEN];
+        unsigned long long team2_area_total[U_LIST_LEN];
+        unsigned long long total_interface;
+        int distance;
+
+        simulation_2D_1v1_interface(agent_2D * agent1, agent_2D * agent2, int sample_size, const char * file, const char * file_sum, int distance) {
+            this->agent1 = agent1;
+            this->agent2 = agent2;
+            this->sample_size = sample_size;
+            double u_step = ((double) U_LIST_MAX) / ((double) U_LIST_LEN); 
+            for (int i = 0; i < U_LIST_LEN; i++) {
+                scaled_u_list[i] = (int) round((i + 1) * u_step * TORUS_SIZE * TORUS_SIZE * log(TORUS_SIZE));
+                team1_area_total[i] = 0;
+                team2_area_total[i] = 0;
+            }
+            srand(time(NULL));
+            output_file.open(file);
+            output_file_sums.open(file_sum);
+            this->total_interface = 0;
+            this->distance = distance;
+        }
+
+        void simulate_sample_size() {
+            output_file << "[";
+            for (int i = 0; i < sample_size; i++) {
+                simulate();
+                if (i != sample_size - 1) output_file << ", ";
+            }
+            output_file << "]";
+            output_file.close();
+
+            output_file_sums << "[";
+            for (int i = 0; i < U_LIST_LEN; i++) {
+                output_file_sums << "[" << team1_area_total[i] << ", " << team2_area_total[i] << "]";
+                if (i != U_LIST_LEN - 1) output_file_sums << ", "; 
+            }
+            output_file_sums << "(total interface: " << this->total_interface << ")";
+            output_file_sums << "]";
+            output_file_sums.close();
+        }
+
+        void simulate() {
+            agent1->t->reset_torus();
+            this->agent1->reset_agent_to_origin();
+            this->agent2->reset_agent_to_distance_from_origin(this->distance);
+            int current_u_list_position = 0;
+            output_file << "[";
+            for (long long i = 0; i < scaled_u_list[U_LIST_LEN - 1]; i++) {
+                if (rand() % 2 == 0) {
+                    this->agent1->move();
+                    this->agent2->move();
+                } else {
+                    this->agent2->move();
+                    this->agent1->move();
+                }
+                if (i + 1 == scaled_u_list[current_u_list_position]) {
+                    unsigned long long team1_area_covered = this->agent1->area_covered;
+                    unsigned long long team2_area_covered = this->agent2->area_covered;
+                    team1_area_total[current_u_list_position] += team1_area_covered;
+                    team2_area_total[current_u_list_position] += team2_area_covered; 
+                    output_file << "[" << this->agent1->area_covered << ", "; 
+                    output_file << this->agent2->area_covered << "]";
+                    if (i + 1 != this->scaled_u_list[U_LIST_LEN - 1]) output_file << ", ";
+                    current_u_list_position++;
+                }
+            }
+            long interface = this->calculate_interface();
+            this->total_interface += interface;
+            output_file << "(interface: " << interface << ")";
+            output_file << "]";
+        }
+
+        long calculate_interface() {
+            long interface = 0;
+            for (int i = 0; i < TORUS_SIZE; i++) {
+                for (int j = 0; j < TORUS_SIZE; j++) {
+                    if (this->agent1->t->grid[i][j] == 1) { // torus[i, j] claimed by agent 1
+                        if (this->agent1->t->grid[(i + 1) % TORUS_SIZE][j] == 2) {
+                            interface++;
+                        }
+                        if (this->agent1->t->grid[i][(j + 1) % TORUS_SIZE] == 2) {
+                            interface++;
+                        }
+                    }
+                    if (this->agent1->t->grid[i][j] == 2) { // torus[i, j] claimed by agent 1
+                        if (this->agent1->t->grid[(i + 1) % TORUS_SIZE][j] == 1) {
+                            interface++;
+                        }
+                        if (this->agent1->t->grid[i][(j + 1) % TORUS_SIZE] == 1) {
+                            interface++;
+                        }
+                    }
+                }
+            }
+            return interface;
+        }
+};
+
+/*
  * Simulates a competition between two teams of agents in 2D.
  * 
  * The first team is a solo agent.

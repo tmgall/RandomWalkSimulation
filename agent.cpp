@@ -43,6 +43,28 @@ class agent_2D {
             }
         }
 
+        void reset_agent_to_origin() {
+            this->x = 0;
+            this->y = 0;
+            this->area_covered = 0;
+            this->memory[0] = RIGHT;
+            this->memory[1] = 2;  
+            for (int i = 2; i < VIKI_MEMORY; i++) {
+                this->memory[i] = -1;
+            }
+        }
+
+        void reset_agent_to_distance_from_origin(int distance) { // distance should be odd, represents Manhattan distance from origin
+            this->x = 1 + distance / 2;
+            this->y = 0 + distance / 2;
+            this->area_covered = 0;
+            this->memory[0] = RIGHT;
+            this->memory[1] = 2;  
+            for (int i = 2; i < VIKI_MEMORY; i++) {
+                this->memory[i] = -1;
+            }
+        }
+
         void update_torus() {
             if (this->t->grid[this->x][this->y] == 0) {
                 this->t->grid[this->x][this->y] = this->id;
@@ -87,16 +109,39 @@ class agent_2D {
             int directions[4];
             int count = 0;
             int last_direction = this->memory[0];
-            if (peek(RIGHT) != MINE && peek(RIGHT) != last_direction) directions[count++] = RIGHT;
-            if (peek(UP) != MINE && peek(UP) != last_direction) directions[count++] = UP;
-            if (peek(LEFT) != MINE && peek(LEFT) != last_direction) directions[count++] = LEFT;
-            if (peek(DOWN) != MINE && peek(DOWN) != last_direction) directions[count++] = DOWN;
+            int non_mine_count = 0;
+            for (const int &direction : {RIGHT, LEFT, DOWN, UP}) {
+                if (peek(direction) != MINE) {
+                    non_mine_count++;
+                    if (direction != last_direction) {
+                        directions[count] = direction;
+                        count++;
+                    }
+                }
+            }
             int direction = RIGHT;
             if (count > 0) {
                 direction = directions[rand() % count];
+                this->memory[0] = this->opposite(direction);
+                return direction;
+            } else if (count == 0 && non_mine_count == 1) {
+                this->memory[0] = this->opposite(last_direction);
+                return last_direction;
+            } else {
+                direction = this->random_walk();
+                this->memory[0] = this->opposite(direction);
+                return direction;
             }
-            this->memory[0] = direction;
-            return direction;
+        }
+
+        int opposite(int direction) {
+            if (direction == RIGHT) return LEFT;
+            if (direction == LEFT) return RIGHT;
+            if (direction == UP) return DOWN;
+            if (direction == DOWN) return UP;
+            if (direction == ZUP) return ZDOWN;
+            if (direction == ZDOWN) return ZUP;
+            return RIGHT;
         }
 
         int greedy_biased() {

@@ -37,10 +37,11 @@ class torus_2D {
         void print_torus() {
             for (int x = 0; x < TORUS_SIZE; x++) {
                 for (int y = 0; y < TORUS_SIZE; y++) {
-                    std::cout << this->grid[x][y] << " "; 
+                    std::cout << (int) this->grid[x][y] << " "; 
                 }
                 std::cout << std::endl;
             }
+            std::cout << std::endl;
         }
 };
 
