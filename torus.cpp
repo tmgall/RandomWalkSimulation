@@ -3,6 +3,33 @@
 #include <iostream>
 
 /*
+ * A 1 dimensional torus 
+ */
+class torus_1D {
+    public:
+        uint8_t grid[TORUS_SIZE];
+
+        torus_1D() {
+            for (int i = 0; i < TORUS_SIZE; i++) {
+                this->grid[i] = 0;
+            }
+        }
+
+        void reset_torus() {
+            for (int i = 0; i < TORUS_SIZE; i++) {
+                this->grid[i] = 0;
+            }
+        }
+        
+        void print_torus() {
+            for (int i = 0; i < TORUS_SIZE; i++) {
+                std::cout << (int) this->grid[i] << " ";
+            }
+            std::cout << std::endl;
+        }
+};
+
+/*
  * A 2 dimensional torus
  */
 class torus_2D {

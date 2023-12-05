@@ -6,6 +6,65 @@
 #include <iostream>
 #include <math.h>
 
+/*
+ * Simulates a competition between two agents in 1D.
+ * 
+ * The output file will hold the total areas covered at the specified
+ * u values by each agent.  
+ */
+class simulation_1D_1v1 {
+    public:
+        agent_1D * agent1 = NULL;
+        agent_1D * agent2 = NULL;
+        int sample_size = 1;
+        std::ofstream torus_file;
+        std::ofstream interface_file;
+        unsigned long long interface_size;
+
+        simulation_1D_1v1(agent_1D * agent1, agent_1D * agent2, int sample_size, const char * torus_file_name, const char * interface_file_name) {
+            this->agent1 = agent1;
+            this->agent2 = agent2;
+            this->sample_size = sample_size;
+            double u_step = ((double) U_LIST_MAX) / ((double) U_LIST_LEN); 
+            srand(time(NULL));
+            torus_file.open(torus_file_name);
+            interface_file.open(interface_file_name);
+            this->interface_size = 0;
+        }
+
+        void simulate_sample_size() {
+            for (int i = 0; i < sample_size; i++) {
+                simulate();
+            }
+            torus_file.close();
+            interface_file.close();
+        }
+
+        void simulate() {
+            agent1->t->reset_torus();
+            this->agent1->reset_agent();
+            this->agent2->reset_agent();
+            for (long long i = 0; i < TORUS_SIZE * TORUS_SIZE; i++) {
+                if (rand() % 2 == 0) {
+                    this->agent1->move();
+                    this->agent2->move();
+                } else {
+                    this->agent2->move();
+                    this->agent1->move();
+                }
+            }
+            for (int i = 0; i < TORUS_SIZE; i++) {
+                if (this->agent1->t->grid[i] != (this->agent1->t->grid[(i + 1) % TORUS_SIZE])) {
+                    this->interface_size++;
+                    torus_file << i << " ";
+                }
+            }
+            torus_file << "\n";
+            interface_file << this->interface_size << "\n";
+            this->interface_size = 0;
+        }
+};
+
 /* 
  * Simulates one agent in 2 dimensions. 
  */ 

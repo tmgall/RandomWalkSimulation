@@ -3,6 +3,51 @@
 #include <time.h>
 
 /*
+ * Creates an agent in 1D with an ID, an initial position,
+ * a running total of area covered on an associated torus,
+ * and a strategy.
+ */
+class agent_1D {
+    public:
+        int x;
+        uint8_t id;
+        unsigned int area_covered;
+        torus_1D * t; 
+        unsigned int starting_position; 
+
+        agent_1D(torus_1D * _t, uint8_t _id, unsigned int _starting_position) {
+            srand(time(NULL));
+            this->x = _starting_position;
+            this->t = _t;
+            this->id = _id;
+            this->area_covered = 0;
+            this->starting_position = _starting_position;
+        }
+
+        void reset_agent() {
+            this->x = this->starting_position;
+            this->area_covered = 0;
+        }
+
+        void update_torus() {
+            if (this->t->grid[this->x] == 0) {
+                this->t->grid[this->x] = this->id;
+                this->area_covered++;
+            }
+        }
+
+        void move() {
+            int r = rand();
+            int direction = RIGHT;
+            if (r % 2 == 0) {
+                direction = LEFT;
+            }
+            this->x = (this->x + dirx[direction] + TORUS_SIZE) % TORUS_SIZE;
+            update_torus();
+        }
+};
+
+/*
  * Creates an agent in 2D with an ID, a random initial position,
  * a running total of area covered on an associated torus, 
  * a strategy, and some memory in case the strategy is viki. 

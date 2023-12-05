@@ -146,12 +146,28 @@ void run_simulation_2d_mines_competition(int strat1, int strat2, const char * fi
     free(agent2);
 }
 
+void run_simulation_1d(int second_starting_position, int sample_size, const char * torus_file_name, const char * interface_file_name) {
+    torus_1D * tor = new torus_1D();
+    agent_1D * agent1 = new agent_1D(tor, 1, 0);
+    agent_1D * agent2 = new agent_1D(tor, 2, second_starting_position);
+    simulation_1D_1v1 sim(agent1, agent2, sample_size, torus_file_name, interface_file_name);
+    std::cout << "Simulation starting..." << std::endl;
+    auto start = std::chrono::system_clock::now();
+    sim.simulate_sample_size();
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed = end - start; 
+    std::cout << "Elapsed time for simulation: " << elapsed.count() << "s" << std::endl;
+    free(tor);
+    free(agent1);
+    free(agent2);}
+
 int main() {
-    int sample_size = 5000;
+    int sample_size = 10000;
 
     auto start = std::chrono::system_clock::now();
 
-    run_simulation_2d_interface(RANDOM_WALK, RANDOM_WALK, "rw_vs_rw_interface.txt", "rw_vs_rw_interface_sums.txt", 2, 1, TORUS_SIZE);
+    // torus_<torus_size>_<a>
+    run_simulation_1d(1, sample_size, "torus_10001_1.txt", "interface_10001_1.txt");
 
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed = end - start; 

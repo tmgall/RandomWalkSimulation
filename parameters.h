@@ -1,9 +1,9 @@
 #pragma once
 
-#define TORUS_SIZE 11
+#define TORUS_SIZE 10001
 
-#define U_LIST_LEN 100
-#define U_LIST_MAX 5
+#define U_LIST_LEN 200
+#define U_LIST_MAX 10
 
 #define MEMORY 7
 // #define VIKI_MEMORY 1002001
